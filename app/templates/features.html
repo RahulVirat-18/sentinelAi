@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Capabilities | Sentinel AI</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: #0f1526; color: #e0e0e0; }
+        a { text-decoration: none; color: inherit; transition: 0.3s; }
+
+        /* NAVBAR */
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 50px; background: rgba(15, 21, 38, 0.95); border-bottom: 1px solid #1f2a48; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); }
+        .logo { font-size: 1.5rem; font-weight: 800; color: #e94560; letter-spacing: 1px; }
+        .nav-links { display: flex; gap: 30px; }
+        .nav-links a:hover { color: #4facfe; }
+        .btn-login { padding: 8px 20px; border: 1px solid #4facfe; color: #4facfe; border-radius: 4px; }
+        .btn-login:hover { background: #4facfe; color: #0f1526; }
+
+        /* HEADER */
+        .header { text-align: center; padding: 80px 20px 50px; background: radial-gradient(circle at center, #1a2240 0%, #0f1526 70%); }
+        h1 { font-size: 3rem; color: #4facfe; margin-bottom: 15px; }
+        p { color: #8892b0; max-width: 700px; margin: 0 auto; font-size: 1.2rem; line-height: 1.6; }
+
+        /* GRID */
+        .features-container { padding: 50px; max-width: 1200px; margin: 0 auto; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 40px; }
+        
+        .card { background: #16213e; padding: 40px; border-radius: 8px; border: 1px solid #1f2a48; transition: 0.3s; }
+        .card:hover { transform: translateY(-5px); border-color: #e94560; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        
+        .icon { font-size: 2.5rem; margin-bottom: 20px; display: block; filter: grayscale(100%); transition: 0.3s; }
+        .card:hover .icon { filter: grayscale(0%); transform: scale(1.1); }
+        
+        h3 { color: #fff; margin-top: 0; font-size: 1.4rem; margin-bottom: 15px; }
+        .desc { color: #a0a0a0; line-height: 1.6; font-size: 0.95rem; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="{{ url_for('home') }}" class="logo">SENTINEL AI</a>
+        <div class="nav-links">
+            <a href="{{ url_for('home') }}"  ></a>Home</a>
+            <a href="{{ url_for('features') }}" style="color: #4facfe;">Features</a>
+            <a href="{{ url_for('privacy') }}">Privacy</a>
+             
+             
+        </div>
+    </nav>
+
+    <div class="header">
+        <h1>Operational Capabilities</h1>
+        <p>A comprehensive suite of forensic tools designed to accelerate investigations and reduce manual workload for law enforcement.</p>
+    </div>
+
+    <div class="features-container">
+        <div class="grid">
+            <div class="card">
+                <span class="icon">🎥</span>
+                <h3>Automated Evidence Analysis</h3>
+                <p class="desc">Eliminate hours of manual video review. Our system automatically scans footage to identify key events, people, and anomalies, producing a summary report in seconds.</p>
+            </div>
+            <div class="card">
+                <span class="icon">📝</span>
+                <h3>Instant Report Generation</h3>
+                <p class="desc">Convert visual data into professional text reports immediately. The system logs timestamps, descriptions, and critical actions for official case files.</p>
+            </div>
+            <div class="card">
+                <span class="icon">🔎</span>
+                <h3>Smart Case Interrogation</h3>
+                <p class="desc">Interact with your evidence naturally. Ask questions like "What color was the getaway vehicle?" or "Describe the suspect's clothing" to retrieve facts instantly.</p>
+            </div>
+            <div class="card">
+                <span class="icon">🧠</span>
+                <h3>Adaptive Intelligence</h3>
+                <p class="desc">The system learns from officer input. If you correct a detail (e.g., updating a license plate number), the AI permanently updates its understanding of the case.</p>
+            </div>
+            <div class="card">
+                <span class="icon">🛡️</span>
+                <h3>Strict Case Isolation</h3>
+                <p class="desc">Maintain absolute integrity. Evidence and data from one investigation are cryptographically isolated, preventing any cross-contamination between cases.</p>
+            </div>
+            <div class="card">
+                <span class="icon">☁️</span>
+                <h3>Centralized Evidence Vault</h3>
+                <p class="desc">A secure, unified digital locker for all case media. Upload, organize, and retrieve video evidence from a single dashboard accessible only to authorized personnel.</p>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

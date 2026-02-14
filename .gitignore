@@ -1,0 +1,97 @@
+# Virtual Environment
+env/
+venv/
+ENV/
+VENV/
+.venv
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.project
+.pydevproject
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# Environment variables
+.env
+.env.local
+.env*.local
+
+# Database
+chroma_db/
+*.sqlite
+*.sqlite3
+*.db
+
+# Flask
+instance/
+.webassets-cache
+
+# Logs
+*.log
+logs/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# OS
+Thumbs.db
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Uploads and temp files
+app/static/uploads/
+temp/
+tmp/
+*.tmp
+
+# IDE settings
+.vscode/settings.json
+.idea/workspace.xml
+.idea/tasks.xml
+
+# Node modules (if using any frontend tooling)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Miscellaneous
+.cache/
+*.cache
+/site

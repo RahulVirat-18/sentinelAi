@@ -1,0 +1,26 @@
+{% extends "case/layout.html" %}
+{% set active_page = "evidence" %}
+
+{% block content %}
+    <h2 style="border-bottom: 1px solid #1f2a48; padding-bottom: 15px; margin-bottom: 20px;">Evidence Storage</h2>
+
+    {% if evidence_list %}
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px;">
+            {% for item in evidence_list %}
+            <div style="background: #1a2240; border-radius: 8px; overflow: hidden; border: 1px solid #1f2a48;">
+                <video width="100%" height="150" controls style="background: black;">
+                    <source src="{{ url_for('static', filename=item.file_path) }}" type="video/mp4">
+                </video>
+                <div style="padding: 10px;">
+                    <h5 style="margin: 0; color: white;">{{ item.title }}</h5>
+                    <span style="font-size: 0.8rem; color: #8892b0;">{{ item.uploaded_at }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div style="text-align: center; color: #8892b0; margin-top: 50px; border: 2px dashed #1f2a48; padding: 40px;">
+            No evidence stored yet.
+        </div>
+    {% endif %}
+{% endblock %}

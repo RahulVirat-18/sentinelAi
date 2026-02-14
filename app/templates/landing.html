@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentinel AI | Next-Gen Forensics</title>
+    <style>
+        /* --- CORE STYLES --- */
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: #0f1526; color: #e0e0e0; overflow-x: hidden; }
+        a { text-decoration: none; color: inherit; transition: 0.3s; }
+        
+        /* --- NAVIGATION --- */
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 50px; background: rgba(15, 21, 38, 0.95); position: fixed; width: 100%; top: 0; z-index: 1000; border-bottom: 1px solid #1f2a48; box-sizing: border-box; backdrop-filter: blur(10px); }
+        .logo { font-size: 1.5rem; font-weight: 800; color: #e94560; letter-spacing: 1px; }
+        .nav-links { display: flex; gap: 30px; }
+        .nav-links a:hover { color: #4facfe; }
+        .btn-login { padding: 8px 20px; border: 1px solid #4facfe; color: #4facfe; border-radius: 4px; }
+        .btn-login:hover { background: #4facfe; color: #0f1526; }
+
+        /* --- HERO SECTION --- */
+        .hero { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; background: radial-gradient(circle at center, #1a2240 0%, #0f1526 70%); padding: 0 20px; }
+        h1 { font-size: 4rem; margin-bottom: 20px; background: linear-gradient(45deg, #4facfe, #00f2fe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: fadeIn 1s ease-in; }
+        p.subtitle { font-size: 1.2rem; color: #8892b0; max-width: 600px; margin-bottom: 40px; line-height: 1.6; animation: fadeIn 1.5s ease-in; }
+        
+        .cta-group { display: flex; gap: 20px; animation: fadeInUp 1s ease-out 0.5s backwards; }
+        .btn-primary { padding: 15px 40px; background: linear-gradient(45deg, #e94560, #c0392b); color: white; border-radius: 5px; font-weight: bold; font-size: 1.1rem; box-shadow: 0 10px 20px rgba(233, 69, 96, 0.3); }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 15px 25px rgba(233, 69, 96, 0.5); }
+        .btn-secondary { padding: 15px 40px; background: transparent; border: 2px solid #2c3e50; color: #a0a0a0; border-radius: 5px; font-weight: bold; font-size: 1.1rem; }
+        .btn-secondary:hover { border-color: #e0e0e0; color: #fff; }
+
+        /* --- FOOTER --- */
+        footer { position: absolute; bottom: 0; width: 100%; padding: 20px; text-align: center; color: #555; font-size: 0.8rem; }
+        .footer-link { color: #555; border-bottom: 1px dotted #555; margin: 0 5px; }
+        .footer-link:hover { color: #8892b0; border-color: #8892b0; }
+
+        /* --- ANIMATIONS --- */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">SENTINEL AI</div>
+        <div class="nav-links">
+            <a href="{{ url_for('features') }}">Features</a>
+            <a href="{{ url_for('privacy') }}">Privacy</a>
+            <a href="{{ url_for('auth.login') }}" class="btn-login">Login</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <h1>AI-Powered Forensics</h1>
+        <p class="subtitle">
+            Accelerate investigations with automated video analysis and intelligent evidence reporting. 
+            Secure. Reliable. Confidential.
+        </p>
+        <div class="cta-group">
+            <a href="{{ url_for('auth.register') }}" class="btn-primary">Register</a>
+            <a href="{{ url_for('features') }}" class="btn-secondary">View Capabilities</a>
+        </div>
+    </section>
+
+    <footer>
+        &copy; 2026 Sentinel AI. All rights reserved. 
+        <span style="margin: 0 10px;">|</span>
+        <a href="{{ url_for('privacy') }}" class="footer-link">Privacy Policy</a>
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,397 @@
+{% extends "case/layout.html" %}
+{% set active_page = "overview" %}
+
+{% block content %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<style>
+    /* --- SCROLLBAR STYLING --- */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #0f1526; }
+    ::-webkit-scrollbar-thumb { background: #1f2a48; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #4facfe; }
+
+    /* --- LAYOUT GRID --- */
+    .dashboard-grid {
+        display: grid; 
+        grid-template-columns: 60% 38%; 
+        gap: 2%; 
+        height: calc(100vh - 100px); /* Fixed height to prevent window scroll */
+        overflow: hidden; /* Stop page expansion */
+    }
+
+    /* --- LEFT COLUMN (Workstation) --- */
+    .workstation-col {
+        display: flex; 
+        flex-direction: column; 
+        gap: 20px; 
+        height: 100%;
+    }
+
+    /* --- BLOCK 1: CONTROL CENTER (Split View) --- */
+    .control-center {
+        background: #1a2240; 
+        border-radius: 8px; 
+        border: 1px solid #1f2a48; 
+        height: 35%; 
+        display: flex; 
+        flex-direction: column; 
+        overflow: hidden;
+    }
+
+    /* Top Half: Upload */
+    .upload-zone {
+        flex: 1;
+        border-bottom: 1px solid #1f2a48;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: 0.3s;
+        background: rgba(79, 172, 254, 0.05);
+    }
+    .upload-zone:hover { background: rgba(79, 172, 254, 0.1); }
+    
+    /* Bottom Half: Analyze */
+    .analyze-zone {
+        flex: 1;
+        padding: 0 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #16213e;
+    }
+
+    /* Analyze Button States */
+    .btn-analyze {
+        padding: 10px 20px;
+        border-radius: 4px;
+        font-weight: bold;
+        border: none;
+        cursor: pointer;
+        transition: 0.3s;
+        width: 100%;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .btn-analyze.active {
+        background: linear-gradient(45deg, #e94560, #c0392b);
+        color: white;
+        box-shadow: 0 4px 15px rgba(233, 69, 96, 0.3);
+    }
+    .btn-analyze.active:hover { transform: scale(1.02); }
+
+    .btn-analyze.disabled {
+        background: #2c3e50;
+        color: #555;
+        cursor: not-allowed;
+        box-shadow: none;
+    }
+
+    /* --- BLOCK 2: REPORT AREA (Fixed Height) --- */
+    .report-block {
+        background: #1a2240; 
+        padding: 0; /* Padding handled inside header/content */
+        border-radius: 8px; 
+        border: 1px solid #1f2a48; 
+        flex: 1; /* Fills remaining space */
+        display: flex; 
+        flex-direction: column;
+        overflow: hidden; /* Contains the scrollable area */
+    }
+
+    .report-header {
+        padding: 15px 20px;
+        border-bottom: 1px solid #1f2a48;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #16213e;
+    }
+
+    .report-tools button {
+        background: transparent;
+        border: 1px solid #2c3e50;
+        color: #a0a0a0;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        margin-left: 5px;
+        transition: 0.3s;
+    }
+    .report-tools button:hover { border-color: #4facfe; color: #4facfe; }
+
+    .report-content {
+        flex: 1; 
+        padding: 20px; 
+        overflow-y: auto; /* Internal Scroll only */
+        color: #e0e0e0; 
+        font-family: 'Courier New', monospace; 
+        line-height: 1.6; 
+        white-space: pre-wrap;
+        background: #0f1526;
+        font-size: 0.9rem;
+    }
+
+    /* --- RIGHT COLUMN (Chat) --- */
+    .chat-block {
+        background: #0f1526; 
+        border: 1px solid #1f2a48; 
+        border-radius: 8px; 
+        display: flex; 
+        flex-direction: column; 
+        height: 100%;
+        overflow: hidden;
+    }
+</style>
+
+<div class="dashboard-grid">
+
+    <div class="workstation-col">
+        
+        <div class="control-center">
+            
+            <div class="upload-zone" onclick="document.getElementById('dash-upload').click()">
+                <div style="text-align: center;">
+                    <span style="font-size: 1.8rem; color: #4facfe;">☁️</span>
+                    <div style="color: #4facfe; font-weight: bold; margin-top: 5px;">Click to Upload Evidence</div>
+                    <div style="color: #8892b0; font-size: 0.75rem;">(Redirects to Evidence Room)</div>
+                </div>
+            </div>
+            <form id="upload-form" action="{{ url_for('case_bp.evidence', case_id=case.id) }}" method="POST" enctype="multipart/form-data" style="display:none;">
+                <input type="file" id="dash-upload" name="video_file" accept=".mp4,.avi,.mov" onchange="document.getElementById('upload-form').submit()">
+            </form>
+
+            <div class="analyze-zone">
+                <div style="flex: 1;">
+                    {% if latest_evidence %}
+                        <div style="color: #4caf50; font-size: 0.8rem; font-weight: bold;">READY TO ANALYZE</div>
+                        <div style="color: white; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">
+                            🎬 {{ latest_evidence.title }}
+                        </div>
+                    {% else %}
+                        <div style="color: #555; font-size: 0.8rem; font-weight: bold;">NO EVIDENCE FOUND</div>
+                        <div style="color: #555; font-size: 0.9rem;">Upload video to enable</div>
+                    {% endif %}
+                </div>
+
+                <div style="flex: 1;">
+                    {% if latest_evidence %}
+                        <button onclick="startDashboardAnalysis({{ latest_evidence.id }})" id="analyze-btn" class="btn-analyze active">
+                            START ANALYSIS ⚡
+                        </button>
+                    {% else %}
+                        <button disabled class="btn-analyze disabled">
+                            AWAITING UPLOAD 🔒
+                        </button>
+                    {% endif %}
+                    
+                    <div id="processing-indicator" style="display: none; text-align: center; color: #4facfe; font-weight: bold; font-size: 0.9rem;">
+                        Processing... ⏳
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="report-block">
+            <div class="report-header">
+                <h3 style="margin: 0; color: #4caf50; font-size: 1rem; display: flex; align-items: center; gap: 8px;">
+                    📄 Forensic Report
+                </h3>
+                <div class="report-tools">
+                    <button onclick="downloadPDF()" title="Download PDF">⬇️ PDF</button>
+                    <button onclick="emailReport()" title="Email to Me">✉️ Email</button>
+                </div>
+            </div>
+            
+            <div id="main-report-area" class="report-content">
+                <span style="color: #555;">[ System Ready. Upload evidence and click 'Start Analysis' to generate a new report. ]</span>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="chat-block">
+        <div style="padding: 15px; border-bottom: 1px solid #1f2a48; font-weight: bold; color: #e94560; background: #16213e;">
+            🤖 Case Assistant
+        </div>
+        
+        <div id="chat-window" style="flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px;">
+            <div style="align-self: flex-start; background: #1f2a48; padding: 10px; border-radius: 8px; max-width: 85%;">
+                I am ready. Ask me about the case evidence.
+            </div>
+        </div>
+
+        <div style="padding: 15px; border-top: 1px solid #1f2a48; display: flex; gap: 10px; background: #16213e;">
+            <input type="text" id="user-input" placeholder="Type here..." 
+                   style="flex: 1; background: #1a2240; border: 1px solid #2c3e50; color: white; padding: 10px; border-radius: 4px;">
+            <button onclick="sendMessage()" style="background: #4facfe; color: #0f1526; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold;">Send</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // 1. ANALYSIS LOGIC
+    function startDashboardAnalysis(id) {
+        const btn = document.getElementById('analyze-btn');
+        const indicator = document.getElementById('processing-indicator');
+        const reportArea = document.getElementById('main-report-area');
+
+        btn.style.display = 'none';
+        indicator.style.display = 'block';
+        reportArea.innerText = "[ Analyzing... This may take a moment... ]";
+
+        fetch(`/analyze/${id}`, { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                indicator.style.display = 'none';
+                btn.style.display = 'block';
+                if (data.success) {
+                    reportArea.innerText = data.report;
+                    // ✅ Success notification with auto-redirect option
+                    showSuccessNotification();
+                } else {
+                    reportArea.innerText = "Error: " + data.error;
+                }
+            })
+            .catch(err => {
+                indicator.style.display = 'none';
+                btn.style.display = 'block';
+                reportArea.innerText = "System Error: " + err;
+            });
+    }
+
+    // ✅ NEW: Success notification with saved reports redirect
+    function showSuccessNotification() {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(45deg, #4caf50, #2e7d32);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            animation: slideIn 0.3s ease;
+            max-width: 350px;
+        `;
+        
+        notification.innerHTML = `
+            <span style="font-size: 1.2rem;">✅</span>
+            <div style="flex: 1;">
+                <strong>Report Generated Successfully!</strong>
+                <div style="font-size: 0.85rem; margin-top: 3px;">The analysis has been saved to your archive.</div>
+            </div>
+            <button onclick="goToSavedReports();" 
+                    style="background: white; color: #4caf50; border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.8rem;">
+                View Reports
+            </button>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Auto-remove after 8 seconds
+        setTimeout(() => {
+            if(notification.parentElement) notification.remove();
+        }, 8000);
+    }
+
+    // ✅ FORCE FRESH LOAD: Navigate to saved reports with hard refresh
+    function goToSavedReports() {
+        // Wait 500ms for DB to fully commit, then reload the saved reports page
+        setTimeout(() => {
+            window.location.href = '{{ url_for('case_bp.saved_reports', case_id=case.id) }}?t=' + Date.now();
+        }, 500);
+    }
+
+    // Add animation style
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+
+    // 2. CHAT LOGIC
+    function sendMessage() {
+        const input = document.getElementById('user-input');
+        const chatWindow = document.getElementById('chat-window');
+        const message = input.value;
+        if (!message) return;
+
+        chatWindow.innerHTML += `
+            <div style="align-self: flex-end; background: #4facfe; color: #0f1526; padding: 10px; border-radius: 8px; max-width: 85%;">
+                ${message}
+            </div>`;
+        input.value = '';
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+
+        fetch("{{ url_for('case_bp.chat_api', case_id=case.id) }}", {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ message: message })
+        })
+        .then(response => response.json())
+        .then(data => {
+            chatWindow.innerHTML += `
+                <div style="align-self: flex-start; background: #1f2a48; color: #e0e0e0; padding: 10px; border-radius: 8px; max-width: 85%;">
+                    ${data.response}
+                </div>`;
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        });
+    }
+
+    // 3. PDF GENERATION
+    function downloadPDF() {
+        const element = document.getElementById('main-report-area');
+        const opt = {
+            margin:       1,
+            filename:     'Case_{{ case.case_unique_id }}_Report.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2 },
+            jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+        };
+        // Use html2pdf library
+        html2pdf().set(opt).from(element).save();
+    }
+
+    // 4. EMAIL REPORT
+    function emailReport() {
+        const reportText = document.getElementById('main-report-area').innerText;
+        if(reportText.includes("[ System Ready")) {
+            showAlert("Please generate a report first.", 'error');
+            return;
+        }
+        
+        showConfirm("Send this report to your registered email?", function(){
+            fetch("{{ url_for('case_bp.email_report', case_id=case.id) }}", {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ report: reportText })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) showAlert("📧 Report sent successfully!", 'success');
+                else showAlert("Error: " + data.error, 'error');
+            });
+        });
+    }
+</script>
+{% endblock %}

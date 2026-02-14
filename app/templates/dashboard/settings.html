@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Settings | Sentinel AI</title>
+    <!-- Global Theme CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='theme.css') }}">
+    <style>
+        /* SHARED STYLES */
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; background-color: #1a1a2e; color: #e0e0e0; transition: background-color 0.3s, color 0.3s; }
+        
+        /* LIGHT MODE THEME */
+        body.light-mode { background-color: #f5f5f5; color: #333; }
+        
+        /* SIDEBAR */
+        .sidebar { width: 260px; background-color: #16213e; padding: 25px; display: flex; flex-direction: column; border-right: 1px solid #1f2a48; transition: background-color 0.3s; }
+        body.light-mode .sidebar { background-color: #e8e8e8; border-right-color: #ddd; }
+        
+        .logo { font-size: 1.6rem; font-weight: 800; color: #e94560; margin-bottom: 50px; }
+        .nav-link { padding: 12px 15px; color: #a0a0a0; text-decoration: none; display: block; margin-bottom: 8px; border-radius: 6px; transition: 0.3s; }
+        body.light-mode .nav-link { color: #666; }
+        
+        .nav-link:hover, .nav-link.active { background-color: #1f2a48; color: #fff; border-left: 3px solid #e94560; }
+        body.light-mode .nav-link:hover, body.light-mode .nav-link.active { background-color: #d0d0d0; color: #000; }
+        
+        /* CONTENT AREA */
+        .main-content { flex: 1; padding: 60px; overflow-y: auto; transition: background-color 0.3s; }
+        body.light-mode .main-content { background-color: #f5f5f5; }
+        
+        /* SETTINGS CARD CONTAINER */
+        .settings-card {
+            background: #16213e;
+            border: 1px solid #1f2a48;
+            border-radius: 10px;
+            padding: 40px;
+            max-width: 600px;
+            margin: 0 auto;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        body.light-mode .settings-card { background: #ffffff; border-color: #ddd; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+
+        .header-section { border-bottom: 1px solid #1f2a48; margin-bottom: 30px; padding-bottom: 15px; transition: border-color 0.3s; }
+        body.light-mode .header-section { border-bottom-color: #ddd; }
+        
+        .header-section h2 { margin: 0; color: white; }
+        body.light-mode .header-section h2 { color: #333; }
+        
+        /* SETTING ROW */
+        .setting-row { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid #1f2a48; transition: border-color 0.3s; }
+        body.light-mode .setting-row { border-bottom-color: #ddd; }
+        .setting-row:last-child { border-bottom: none; }
+        
+        .label h4 { margin: 0 0 5px 0; font-size: 1.1rem; color: white; }
+        body.light-mode .label h4 { color: #333; }
+        
+        .label p { margin: 0; color: #8892b0; font-size: 0.9rem; }
+        body.light-mode .label p { color: #666; }
+
+        /* TOGGLE SWITCH CSS */
+        .switch { position: relative; display: inline-block; width: 55px; height: 28px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #2c3e50; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        
+        /* Colors when Active */
+        input:checked + .slider.theme-slider { background-color: #4facfe; }
+        input:checked + .slider.sec-slider { background-color: #e94560; }
+        
+        input:checked + .slider:before { transform: translateX(26px); }
+
+        /* SAVE BUTTON */
+        .btn-save { width: 100%; padding: 15px; background: #4facfe; border: none; border-radius: 5px; color: #0f1526; font-weight: bold; font-size: 1rem; margin-top: 30px; cursor: pointer; transition: 0.3s; }
+        .btn-save:hover { background: #fff; }
+        body.light-mode .btn-save { background: #0f1526; color: #4facfe; border: 2px solid #4facfe; }
+        body.light-mode .btn-save:hover { background: #4facfe; color: #0f1526; }
+
+        /* ALERT MESSAGES */
+        .alert { padding: 15px; margin-bottom: 20px; border-radius: 4px; text-align: center; }
+        .alert.success { background: rgba(76, 175, 80, 0.1); color: #4caf50; border: 1px solid #4caf50; }
+        .alert.error { background: rgba(233, 69, 96, 0.1); color: #e94560; border: 1px solid #e94560; }
+    </style>
+</head>
+<body{% if session.get('theme') == 'light' %} class="light-mode"{% endif %}>
+
+    <div class="sidebar">
+        <div class="logo">SENTINEL AI</div>
+        <a href="{{ url_for('dashboard.index') }}" class="nav-link">Dashboard</a>
+        <a href="{{ url_for('profile_bp.profile') }}" class="nav-link">User Profile</a>
+        <a href="#" class="nav-link active">Settings</a>
+        <a href="{{ url_for('auth.logout') }}" class="nav-link" style="margin-top: auto; color: #ff6b6b;">Logout</a>
+    </div>
+
+    <div class="main-content">
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" class="settings-card">
+            <div class="header-section">
+                <h2>App Preferences</h2>
+            </div>
+
+            <div class="setting-row">
+                <div class="label">
+                    <h4>Light Mode</h4>
+                    <p>Switch interface to light color scheme.</p>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" name="theme_toggle" {% if settings.setting_theme == 'light' %}checked{% endif %}>
+                    <span class="slider theme-slider"></span>
+                </label>
+            </div>
+
+            <div class="setting-row">
+                <div class="label">
+                    <h4 style="color: #e94560;">Two-Factor Auth (2FA)</h4>
+                    <p>Require verification on login.</p>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" name="2fa_toggle" {% if settings.is_2fa_enabled %}checked{% endif %}>
+                    <span class="slider sec-slider"></span>
+                </label>
+            </div>
+
+            <div class="setting-row">
+                <div class="label">
+                    <h4>Login Alerts</h4>
+                    <p>Notify me of new sign-ins.</p>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" name="alerts_toggle" {% if settings.setting_login_alerts %}checked{% endif %}>
+                    <span class="slider sec-slider"></span>
+                </label>
+            </div>
+
+            <button type="submit" class="btn-save">Save Preferences</button>
+        </form>
+
+    </div>
+
+    <script>
+        // Apply theme on page load
+        function applyTheme() {
+            const currentTheme = "{{ session.get('theme', 'dark') }}";
+            if (currentTheme === 'light') {
+                document.body.classList.add('light-mode');
+            } else {
+                document.body.classList.remove('light-mode');
+            }
+        }
+
+        // Load theme when page loads
+        document.addEventListener('DOMContentLoaded', applyTheme);
+        applyTheme(); // Also call immediately in case DOM is already ready
+
+        // Real-time toggle preview (update on checkbox change)
+        document.querySelector('input[name="theme_toggle"]').addEventListener('change', function(e) {
+            if (this.checked) {
+                document.body.classList.add('light-mode');
+            } else {
+                document.body.classList.remove('light-mode');
+            }
+        });
+
+        // Override form submission to update theme in session BEFORE saving to DB
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const isLightMode = document.querySelector('input[name="theme_toggle"]').checked;
+            // Store theme preference to apply on next page load
+            // This works because the form submission will reload the page
+            if (isLightMode) {
+                document.body.classList.add('light-mode');
+            } else {
+                document.body.classList.remove('light-mode');
+            }
+        });
+    </script>
+
+</body>
+</html>

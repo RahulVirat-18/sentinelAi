@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard | Sentinel AI</title>
+    <meta http-equiv="Cache-Control" content="no-store">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <!-- Global Theme CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='theme.css') }}">
+    <script src="{{ url_for('static', filename='js/ui_modals.js') }}"></script>
+    <style>
+        /* --- RESET & LAYOUT --- */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; display: flex; height: 100vh; background-color: #1a1a2e; color: #e0e0e0; }
+        
+        /* --- SIDEBAR --- */
+        .sidebar { width: 260px; background-color: #16213e; padding: 25px; display: flex; flex-direction: column; border-right: 1px solid #0f3460; box-shadow: 2px 0 10px rgba(0,0,0,0.3); }
+        .logo { font-size: 1.6rem; font-weight: 800; color: #e94560; margin-bottom: 50px; letter-spacing: 1px; }
+        .nav-link { padding: 12px 15px; color: #a0a0a0; text-decoration: none; display: block; margin-bottom: 8px; border-radius: 6px; font-weight: 500; transition: all 0.3s ease; }
+        .nav-link:hover, .nav-link.active { background-color: #0f3460; color: #fff; transform: translateX(5px); }
+        .logout { margin-top: auto; color: #ff6b6b; border: 1px solid #ff6b6b; text-align: center; }
+        .logout:hover { background-color: #ff6b6b; color: white; }
+
+        /* --- MAIN CONTENT --- */
+        .main-content { flex: 1; padding: 40px; overflow-y: auto; position: relative; }
+        
+        /* Header */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; border-bottom: 1px solid #0f3460; padding-bottom: 20px; }
+        .header h2 { margin: 0; font-weight: 300; }
+        .user-badge { background: #0f3460; padding: 5px 15px; border-radius: 20px; font-size: 0.9rem; }
+
+        /* Alerts */
+        .alert { padding: 15px; margin-bottom: 20px; border-radius: 5px; text-align: center; }
+        .alert.error { background: rgba(233, 69, 96, 0.2); border: 1px solid #e94560; color: #e94560; }
+        .alert.success { background: rgba(76, 175, 80, 0.2); border: 1px solid #4caf50; color: #4caf50; }
+
+        /* Create Case Form (Panel) */
+        .form-panel { background: #16213e; padding: 25px; border-radius: 8px; border: 1px solid #0f3460; margin-bottom: 40px; }
+        .form-panel h3 { margin-top: 0; color: #fff; font-size: 1.1rem; margin-bottom: 15px; }
+        .form-row { display: flex; gap: 15px; margin-bottom: 15px; }
+        .form-group { flex: 1; }
+        
+        input, textarea { width: 100%; padding: 12px; background: #0f3460; border: 1px solid transparent; color: white; border-radius: 4px; box-sizing: border-box; font-family: inherit; }
+        input:focus, textarea:focus { border-color: #4facfe; outline: none; }
+        
+        button.btn-create { padding: 12px 25px; background: linear-gradient(45deg, #e94560, #c0392b); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        button.btn-create:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(233, 69, 96, 0.4); }
+
+        /* --- CASE GRID (EDGE CUT BLOCKS) --- */
+        .case-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
+        
+        .case-card {
+            background: linear-gradient(145deg, #1a2240, #16213e);
+            padding: 25px;
+            position: relative;
+            /* The Edge Cut Style */
+            clip-path: polygon(
+                20px 0, 100% 0, 
+                100% calc(100% - 20px), calc(100% - 20px) 100%, 
+                0 100%, 0 20px
+            );
+            border-left: 4px solid #e94560;
+            transition: all 0.3s ease;
+        }
+        .case-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        
+        .case-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px; }
+        .case-id-badge { background: #0f3460; color: #4facfe; padding: 3px 8px; font-size: 0.75rem; border-radius: 3px; font-family: 'Courier New', monospace; letter-spacing: 1px; border: 1px solid #1f4068; }
+        
+        .case-title { font-size: 1.3rem; font-weight: 700; color: #fff; margin-bottom: 5px; }
+        .case-desc { font-size: 0.9rem; color: #8892b0; margin-bottom: 25px; line-height: 1.4; height: 40px; overflow: hidden; text-overflow: ellipsis; }
+        
+        .case-actions { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #1f2a48; padding-top: 15px; }
+        
+        .btn-open { color: #4facfe; text-decoration: none; font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; }
+        .btn-open:hover { text-decoration: underline; }
+        
+        .btn-delete { color: #e94560; text-decoration: none; font-size: 0.85rem; opacity: 0.7; transition: 0.3s; }
+        .btn-delete:hover { opacity: 1; }
+
+    </style>
+</head>
+<body{% if session.get('theme') == 'light' %} class="light-mode"{% endif %}>
+
+    <div class="sidebar">
+        <div class="logo">SENTINEL AI</div>
+        <a href="#" class="nav-link active">Dashboard</a>
+        <a href="{{ url_for('profile_bp.profile') }}" class="nav-link">User Profile</a>
+        <a href="{{ url_for('settings_bp.settings') }}" class="nav-link">Settings</a>
+        <a href="#" class="nav-link logout" onclick="event.preventDefault(); showConfirm('Are you sure you want to logout?', function(){ window.location = '{{ url_for('auth.logout') }}'; });">Logout</a>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <h2>Case Management Console</h2>
+            <div class="user-badge">User: {{ user_name }}</div>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="form-panel">
+            <h3>+ Initialize New Case</h3>
+            <form action="{{ url_for('dashboard.create_case') }}" method="POST">
+                <div class="form-row">
+                    <div class="form-group" style="flex: 1;">
+                        <input type="text" name="case_unique_id" placeholder="Case ID (Unique, e.g., CASE-001)" required>
+                    </div>
+                    <div class="form-group" style="flex: 2;">
+                        <input type="text" name="case_name" placeholder="Case Name / Subject" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <textarea name="description" placeholder="Brief Case Description..." rows="2"></textarea>
+                </div>
+                <div style="text-align: right; margin-top: 10px;">
+                    <button type="submit" class="btn-create">CREATE CASE</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="case-grid">
+            {% for case in cases %}
+            <div class="case-card">
+                <div class="case-header">
+                    <span class="case-id-badge">{{ case.case_unique_id }}</span>
+                </div>
+                <div class="case-title">{{ case.case_name }}</div>
+                <div class="case-desc">{{ case.description }}</div>
+                
+                <div class="case-actions">
+                    <a href="{{ url_for('case_bp.overview', case_id=case.id) }}" class="btn-open">ACCESS CASE &rarr;</a>
+                    <a href="{{ url_for('dashboard.delete_case', case_id=case.id) }}" class="btn-delete" onclick="event.preventDefault(); showConfirm('WARNING: Deleting this case will erase all evidence and logs permanently. Proceed?', function(){ window.location = '{{ url_for('dashboard.delete_case', case_id=case.id) }}'; });">Delete</a>
+                </div>
+            </div>
+            {% else %}
+            <div style="grid-column: 1/-1; text-align: center; color: #536dfe; padding: 40px; border: 2px dashed #1f2a48; border-radius: 10px;">
+                No active cases found. Initialize a new case above.
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+    // If page is restored from bfcache, force reload to validate session on server
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) {
+            window.location.reload();
+        }
+    });
+    </script>
+</body>
+</html>

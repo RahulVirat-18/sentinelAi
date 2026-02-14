@@ -1,0 +1,174 @@
+/* ============================================
+   GLOBAL THEME SYSTEM - Dark/Light Mode
+   ============================================ */
+
+/* BASE DARK MODE (Default) */
+:root {
+    /* Dark Mode Colors */
+    --bg-primary: #1a1a2e;
+    --bg-secondary: #16213e;
+    --bg-tertiary: #0f1526;
+    --text-primary: #e0e0e0;
+    --text-secondary: #a0a0a0;
+    --text-tertiary: #8892b0;
+    --border-color: #1f2a48;
+    --accent-primary: #4facfe;
+    --accent-danger: #e94560;
+    --input-bg: #0f3460;
+    --card-bg: #16213e;
+}
+
+/* LIGHT MODE */
+body.light-mode {
+    --bg-primary: #f5f5f5;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #e8e8e8;
+    --text-primary: #333333;
+    --text-secondary: #666666;
+    --text-tertiary: #888888;
+    --border-color: #dddddd;
+    --accent-primary: #0f1526;
+    --accent-danger: #e94560;
+    --input-bg: #f0f0f0;
+    --card-bg: #ffffff;
+}
+
+/* Apply theme colors to body and main elements */
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Sidebar */
+.sidebar {
+    background-color: var(--bg-secondary) !important;
+    border-color: var(--border-color) !important;
+    transition: background-color 0.3s ease;
+}
+
+body.light-mode .sidebar {
+    background-color: var(--bg-tertiary) !important;
+}
+
+/* Navigation Links */
+.nav-link {
+    color: var(--text-secondary);
+    transition: color 0.3s ease;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    background-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+/* Main Content Area */
+.main-content {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    transition: background-color 0.3s ease;
+}
+
+/* Cards and Panels */
+.case-card,
+.settings-card,
+.form-panel,
+.report-table {
+    background-color: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Text Elements */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-primary);
+}
+
+p, span, label {
+    color: var(--text-primary);
+}
+
+.label p, .label h4 {
+    color: var(--text-secondary);
+}
+
+body.light-mode .label p {
+    color: var(--text-tertiary);
+}
+
+/* Input Fields */
+input,
+textarea,
+select {
+    background-color: var(--input-bg) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--accent-primary) !important;
+}
+
+/* Buttons */
+.btn-save,
+.btn-create,
+.btn-analyze.active {
+    transition: all 0.3s ease;
+}
+
+body.light-mode .btn-save {
+    background-color: var(--accent-primary) !important;
+    color: var(--bg-primary) !important;
+}
+
+/* Tables */
+.report-table th {
+    background-color: var(--bg-tertiary) !important;
+    color: var(--accent-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+.report-table td {
+    border-color: var(--border-color) !important;
+}
+
+.report-table tr:hover {
+    background-color: var(--border-color) !important;
+}
+
+/* Headers */
+.header {
+    border-color: var(--border-color) !important;
+}
+
+.user-badge {
+    background-color: var(--bg-tertiary) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Alerts */
+.alert {
+    transition: background-color 0.3s ease;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-tertiary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-primary);
+}

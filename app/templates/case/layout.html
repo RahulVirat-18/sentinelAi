@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Case {{ case.case_unique_id }} | Sentinel AI</title>
+    <!-- Global Theme CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='theme.css') }}">
+    <style>
+        /* Shared Styles */
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; background-color: #1a1a2e; color: #e0e0e0; overflow: hidden; }
+        
+        /* SIDEBAR */
+        .sidebar { width: 260px; background-color: #0f1526; padding: 25px; display: flex; flex-direction: column; border-right: 1px solid #1f2a48; }
+        .case-badge { font-size: 0.9rem; color: #4facfe; border: 1px solid #1f2a48; padding: 5px; text-align: center; border-radius: 4px; margin-bottom: 20px; font-family: monospace; }
+        .nav-link { padding: 12px 15px; color: #8892b0; text-decoration: none; display: block; margin-bottom: 8px; border-radius: 6px; transition: 0.3s; }
+        .nav-link:hover, .nav-link.active { background-color: #1f2a48; color: #fff; border-left: 3px solid #e94560; }
+        .back-btn { margin-top: auto; color: #fff; background: #2c3e50; text-align: center; padding: 10px; border-radius: 5px; text-decoration: none; font-size: 0.9rem; }
+        
+        /* MAIN CONTENT */
+        .main-content { flex: 1; padding: 40px; overflow-y: auto; background-color: #16213e; position: relative; }
+
+        /* --- IN-SYSTEM NOTIFICATION ANIMATION --- */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .toast {
+            background: rgba(76, 175, 80, 0.9); /* Green Success */
+            color: white;
+            padding: 15px 25px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            opacity: 0;
+            transform: translateX(100%);
+            animation: slideIn 0.5s forwards, fadeOut 0.5s forwards 4s; /* Slide in, wait, fade out */
+        }
+        
+        .toast.error { background: rgba(233, 69, 96, 0.9); } /* Red Error */
+
+        @keyframes slideIn {
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes fadeOut {
+            to { opacity: 0; transform: translateY(-20px); }
+        }
+    </style>
+</head>
+<body{% if session.get('theme') == 'light' %} class="light-mode"{% endif %}>
+
+    <div class="toast-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="toast {{ category }}">
+                        <span>🔔</span> {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <div class="sidebar">
+        <div style="font-weight: bold; color: #e94560; margin-bottom: 10px;">CASE FILE</div>
+        <div class="case-badge">{{ case.case_unique_id }}</div>
+        
+        <a href="{{ url_for('case_bp.overview', case_id=case.id) }}" class="nav-link {% if active_page == 'overview' %}active{% endif %}">
+            📊 Case Dashboard
+        </a>
+        <a href="{{ url_for('case_bp.evidence', case_id=case.id) }}" class="nav-link {% if active_page == 'evidence' %}active{% endif %}">
+            📂 Evidence Room
+        </a>
+
+        <a href="{{ url_for('case_bp.saved_reports', case_id=case.id) }}" class="nav-link {% if active_page == 'reports' %}active{% endif %}" style="margin-left: 10px; border-left: 2px solid #2c3e50;">
+            📄 Saved Reports
+        </a>
+
+        <a href="{{ url_for('dashboard.index') }}" class="back-btn">← Back to Main Menu</a>
+    </div>
+
+    <div class="main-content">
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="{{ url_for('static', filename='js/ui_modals.js') }}"></script>
+</body>
+</html>
